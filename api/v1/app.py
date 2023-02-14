@@ -14,7 +14,7 @@ app.register_blueprint(app_views, url_prefix='/api/v1/')
 
 @app.teardown_appcontext
 def close_context(self):
-    """ tears down current session """
+    """ tears down current session (done after every request) """
     storage.close()
 
 
