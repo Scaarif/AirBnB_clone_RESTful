@@ -8,6 +8,8 @@ import os
 
 # instantiate a Flask application
 app = Flask(__name__)
+# override strict_slashes behaviour globally
+app.url_map.strict_slashes = False
 # register app_views Blueprint (include url_prefix)
 app.register_blueprint(app_views, url_prefix='/api/v1/')
 
