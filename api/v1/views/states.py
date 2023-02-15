@@ -2,7 +2,7 @@
 """ Defines a view for State objects: handles all default RESTful API
     actions (i.e. GET, PUT, POST & DELETE) """
 from api.v1.views import app_views
-from flask import jsonify, abort, request
+from flask import jsonify, abort, request, make_response
 from models import storage
 from models.state import State
 
@@ -46,10 +46,10 @@ def add_state():
     Returns the new state and status code 201 """
     # check that the request body is JSON
     if not request.json:
-        abort(400)  # message should be: "Not a JSON"
+        return jsonify('Not a JSON'), 400
     state_info = request.get_json()  # returns a dict
     if 'name' not in state_info:
-        abort(400)  # msg: Missing name
+        abort(make_response(jsonify('Missing name'), 400))
     # create new State
     state = State(**state_info)
     state.save()
@@ -66,7 +66,8 @@ def update_state(state_id):
     if not state:
         abort(404)
     if not request.json:
-        abort(400)  # Not a JSON
+        # abort(400)  # Not a JSON
+        return jsonify('Not a JSON'), 400
     state_info = request.get_json()
     # update state (by updating/adding its attributes)
     ignore = ['id', 'created_at', 'updated_at']
