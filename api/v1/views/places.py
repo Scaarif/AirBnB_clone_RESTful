@@ -7,6 +7,7 @@ from models import storage
 from models.place import Place
 from models.city import City
 from models.user import User
+from models.state import State
 
 
 @app_views.route('/cities/<city_id>/places')
@@ -89,3 +90,53 @@ def update_place(place_id):
             setattr(place, key, value)
     place.save()
     return jsonify(place.to_dict()), 200
+
+
+@app_views.route('/places_search', methods=['POST'])
+def places_search():
+    """ retrieves all Place objects depending on request body """
+    # check that the request body is JSON
+    if not request.json:
+        abort(make_response(jsonify('Not a JSON'), 400))
+    req = request.get_json()
+    expected = {}  # each holds a list of IDs or is empty
+    expected['states'] = req.get('states', [])
+    expected['cities'] = req.get('cities', [])
+    expected['amenities'] = req.get('amenities', [])
+    to_return = []
+    # check if request body is empty
+    if (len(req) == 0 or
+            (expected['states'] == expected['cities']
+             == expected['amenities'] == [])):
+        return jsonify([place.to_dict()
+                        for place in storage.all(Place).values()])
+    if expected['states']:
+        # get all places in states listed
+        for id_ in expected['states']:
+            if storage.get(State, id_):
+                for city in storage.get(State, id_).cities:
+                    to_return.extend(storage.get(City, city.id).places)
+    if expected['cities']:
+        # get all places in cities listed (unless city in states listed)
+        for id_ in expected['cities']:
+            if storage.get(City, id_):
+                if storage.get(City, id_).state_id not in expected['states']:
+                    to_return.extend(storage.get(City, id_).places)
+    if expected['amenities']:
+        # filter to_return - discard place if it doesn't have all the amenities
+        # filtered = []
+        for place in to_return:
+            amenity_ids = []
+            for amenity in place.amenities:
+                amenity_ids.append(amenity.id)
+            for id_ in expected['amenities']:
+                if id_ not in amenity_ids:
+                    # break
+                    to_return.remove(place)
+            else:
+                pass
+                # filtered.append(place.to_dict())  # all amenities in place
+                # filtered.append(place.to_dict())  # all amenities in place
+        return jsonify([place.to_dict() for place in to_return])
+    else:
+        return jsonify([place.to_dict() for place in to_return])
