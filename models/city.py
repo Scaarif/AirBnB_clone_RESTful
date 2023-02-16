@@ -22,3 +22,15 @@ class City(BaseModel, Base):
     def __init__(self, *args, **kwargs):
         """initializes city"""
         super().__init__(*args, **kwargs)
+
+    if models.storage_t != 'db':
+        @property
+        def places(self):
+            """ getter attribute: returns list this City instance's places """
+            from models.place import Place
+            city_places = []
+            places = models.storage.all(Place).values()
+            for place in places:
+                if place.city_id == self.id:
+                    city_places.append(place)
+            return city_places

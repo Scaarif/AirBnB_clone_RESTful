@@ -2,6 +2,7 @@
 """ Instantiates a Flask application & registers BluePrints """
 from api.v1.views import app_views
 from flask import Flask, make_response, jsonify
+from flask_cors import CORS
 from models import storage
 import os
 
@@ -10,7 +11,9 @@ import os
 app = Flask(__name__)
 # override strict_slashes behaviour globally
 app.url_map.strict_slashes = False
-# register app_views Blueprint (include url_prefix)
+# add CORS to allow cross-origin requests (from 0.0.0.0) ->anywhere
+CORS(app)
+# register app_views Blueprint (include url_prefix
 app.register_blueprint(app_views, url_prefix='/api/v1/')
 
 
