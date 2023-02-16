@@ -12,7 +12,7 @@ app = Flask(__name__)
 # override strict_slashes behaviour globally
 app.url_map.strict_slashes = False
 # add CORS to allow cross-origin requests (from 0.0.0.0) ->anywhere
-CORS(app)
+CORS(app, resources={r"/api/v1/*": {"origins": '0.0.0.0'}})
 # register app_views Blueprint (include url_prefix
 app.register_blueprint(app_views, url_prefix='/api/v1/')
 
