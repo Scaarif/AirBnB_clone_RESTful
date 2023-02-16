@@ -8,6 +8,7 @@ from models.place import Place
 from models.city import City
 from models.user import User
 from models.state import State
+import os
 
 
 @app_views.route('/cities/<city_id>/places')
@@ -124,19 +125,23 @@ def places_search():
                     to_return.extend(storage.get(City, id_).places)
     if expected['amenities']:
         # filter to_return - discard place if it doesn't have all the amenities
-        # filtered = []
+        filtered = []
         for place in to_return:
             amenity_ids = []
-            for amenity in place.amenities:
-                amenity_ids.append(amenity.id)
+            if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+                for amenity in place.amenities:
+                    amenity_ids.append(amenity.id)
+            else:
+                amenity_ids = place.amenity_ids  # place.amenities
             for id_ in expected['amenities']:
                 if id_ not in amenity_ids:
-                    # break
-                    to_return.remove(place)
+                    break
             else:
-                pass
-                # filtered.append(place.to_dict())  # all amenities in place
-                # filtered.append(place.to_dict())  # all amenities in place
-        return jsonify([place.to_dict() for place in to_return])
+                place_ = place.to_dict()
+                del place_['amenities']
+                filtered.append(place_)  # all amenities in place
+        # print(f'filtered out ({len(to_return) - len(filtered)})')
+        return jsonify(filtered)
+        # return jsonify([place.to_dict() for place in to_return])
     else:
         return jsonify([place.to_dict() for place in to_return])
