@@ -107,10 +107,9 @@ def places_search():
     to_return = []
     # check if request body is empty
     if (len(req) == 0 or
-            (expected['states'] == expected['cities']
-             == expected['amenities'] == [])):
-        return jsonify([place.to_dict()
-                        for place in storage.all(Place).values()])
+            (expected['states'] == expected['cities'])):
+        for place in storage.all(Place).values():
+            to_return.append(place)
     if expected['states']:
         # get all places in states listed
         for id_ in expected['states']:
