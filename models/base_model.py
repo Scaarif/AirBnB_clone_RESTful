@@ -69,8 +69,10 @@ class BaseModel:
         new_dict["__class__"] = self.__class__.__name__
         if "_sa_instance_state" in new_dict:
             del new_dict["_sa_instance_state"]
-        if "password" in new_dict:
-            new_dict['password'] = hashlib.md5(new_dict['password'].encode()).hexdigit()
+        # Delete `password` attribute for User object and when not FileStorage
+        if "password" in new_dict and self.__class__.__name__ != 'FileStorage':
+            # Will not enter here if `self` is a FileStorage instance
+            del new_dict['password']
         return new_dict
 
     def delete(self):
